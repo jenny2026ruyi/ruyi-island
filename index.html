@@ -641,8 +641,8 @@ function buildDB(data){
       gateAsk:s.gate_ask||"",gateTitle:s.gate_title||"",gateRefuse:s.gate_refuse||"",
       gateBonus:(s.gate_bonus!=null?s.gate_bonus:null)
     },
-    tasks:(data.tasks||[]).map(mapTaskFromDB),
-    prizes:(data.rewards||[]).map(mapRewardFromDB),
+   tasks:(data.tasks||[]).map(mapTaskFromDB),
+prizes:(data.rewards||[]).map(mapRewardFromDB),
     logs:{},skips:{},redeemed:[],extra:s.extra||[],
     stars:{earned:s.stars_earned||0,spent:s.stars_spent||0},
     streaks:s.streaks||{full:0,lastFullDay:null,bestFull:0},
@@ -676,6 +676,8 @@ async function cloudLoad(){
   if(liR.error)throw liR.error;
   if(llR.error)throw llR.error;
   if(sR.error)throw sR.error;
+    const rwR=await sb.from('rewards').select('*');
+  if(rwR.error)throw rwR.error;
   const settings=sR.data;
   const tasksEmpty=!tR.data||tR.data.length===0;
   if(!settings&&tasksEmpty){
@@ -695,7 +697,7 @@ async function cloudLoad(){
       return b;
     }
   }
-  const db=buildDB({tasks:tR.data,records:rR.data,lifeItems:liR.data,lifeLog:llR.data,settings:settings});
+  const db=buildDB({tasks:tR.data,records:rR.data,rewards:rwR.data,lifeItems:liR.data,lifeLog:llR.data,settings:settings});
   restoreMirror(db);
   mirrorSave(db);
   return db;
